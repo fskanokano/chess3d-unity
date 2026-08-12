@@ -211,12 +211,6 @@ jobs:
             echo "has_license=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Auto-activate Personal License (free)
-        if: steps.check_license.outputs.has_license == 'auto'
-        uses: game-ci/unity-activate@v2
-        with:
-          unityVersion: 2022.3.62f1
-
       - name: Checkout
         if: steps.check_license.outputs.has_license != 'false'
         uses: actions/checkout@v4
