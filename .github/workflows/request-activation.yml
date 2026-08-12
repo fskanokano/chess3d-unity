@@ -1,0 +1,33 @@
+name: Request Unity Activation File
+
+on:
+  workflow_dispatch:
+
+jobs:
+  request-alf:
+    runs-on: ubuntu-latest
+    name: Generate Unity .alf file
+    steps:
+      - name: Request Activation File
+        id: getAlfFile
+        uses: game-ci/unity-request-activation-file@v4
+        with:
+          unityVersion: 2022.3.76f1
+
+      - name: Upload .alf Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity_v2022.3.76f1.alf
+          path: ${{ steps.getAlfFile.outputs.filePath }}
+          retention-days: 7
+
+      - name: Instructions
+        run: |
+          echo "=== 下一步 ==="
+          echo "1. 下载产物 Unity_v2022.3.76f1.alf"
+          echo "2. 打开 https://license.unity3d.com/manual 上传 .alf"
+          echo "3. 下载得到的 Unity_v2022.3.76f1.ulf"
+          echo "4. 执行: cat Unity_v2022.3.76f1.ulf | base64 -w0"
+          echo "5. 复制输出，到 https://github.com/fskanokano/chess3d-unity/settings/secrets/actions"
+          echo "   新建 secret 名为 UNITY_LICENSE，值为上一步的 base64 字符串"
+          echo "6. 再次 push 任意提交，即自动构建 APK"
