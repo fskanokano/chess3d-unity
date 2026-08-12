@@ -1,0 +1,24 @@
+apply plugin: 'com.android.application'
+dependencies { implementation fileTree(dir: 'libs', include: ['*.jar','*.aar']) }
+android {
+    compileSdkVersion {{SdkVersion}}
+    ndkVersion "{{NdkVersion}}"
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    defaultConfig {
+        applicationId "{{applicationId}}"
+        minSdkVersion {{MinSdkVersion}}
+        targetSdkVersion {{TargetSdkVersion}}
+        versionCode {{VersionCode}}
+        versionName '{{VersionName}}'
+    }
+    signingConfigs { release { storeFile file('{{keystoreName}}'); storePassword '{{keystorePass}}'; keyAlias '{{keyAlias}}'; keyPassword '{{keyAliasPass}}' } }
+    buildTypes {
+        debug { minifyEnabled false; signingConfig signingConfigs.debug }
+        release { minifyEnabled true; signingConfig signingConfigs.release; proguardFiles getDefaultProguardFile('proguard-android.txt'),'proguard-unity.txt' }
+    }
+    splits { abi { enable true; reset(); include 'arm64-v8a'; universalApk false } }
+    lint { abortOnError false }
+}

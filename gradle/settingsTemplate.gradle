@@ -1,0 +1,2 @@
+include ':launcher', ':unityLibrary'
+project(':unityLibrary').projectDir = new File('unityLibrary')
