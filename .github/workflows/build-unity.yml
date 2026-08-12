@@ -54,7 +54,7 @@ jobs:
               public class ScriptableObject : Object {}
               public class Sprite : Object {}
           }
-          namespace UnityEngine.SceneManagement { public static class SceneManager { public static void LoadScene(string s) {} } }
+          namespace UnityEngine.SceneManagement { public static class SceneManager { public static void LoadScene(string s) {} public static AsyncOperation LoadSceneAsync(string s) => null; } }
           CS
 
           # UnityEngine 模拟 - 核心
@@ -65,21 +65,22 @@ jobs:
               public class Component: Object { public GameObject gameObject{get;set;} public Transform transform{get;set;} public T GetComponent<T>()where T:Component=>null; public T[] GetComponents<T>()where T:Component=>null; public T GetComponentInChildren<T>()where T:Component=>null; }
               public class Behaviour: Component{}
               public class Coroutine{} public class MonoBehaviour: Behaviour { public Coroutine StartCoroutine(IEnumerator r)=>null; }
-              public class GameObject: Object { public GameObject(){} public GameObject(string n){name=n;} public Transform transform{get;set;} public T AddComponent<T>()where T:Component=>null; public T GetComponent<T>()where T:Component=>null; public void SetActive(bool v){} public bool activeSelf{get;set;} public static GameObject Find(string n)=>null; public string tag{get;set;} }
-              public class Transform: Component { public Vector3 position; public Vector3 localPosition; public Vector3 localScale=Vector3.one; public Quaternion rotation; public Quaternion localRotation; public void SetParent(Transform p){} public void SetParent(Transform p,bool w){} public Transform parent{get;set;} }
+              public class GameObject: Object { public GameObject(){} public GameObject(string n){name=n;} public Transform transform{get;set;} public T AddComponent<T>()where T:Component=>null; public T GetComponent<T>()where T:Component=>null; public T GetComponentInChildren<T>()where T:Component=>null; public void SetActive(bool v){} public bool activeSelf{get;set;} public static GameObject Find(string n)=>null; public string tag{get;set;} }
+              public class Transform: Component { public Vector3 position; public Vector3 localPosition; public Vector3 localScale=Vector3.one; public Quaternion rotation; public Quaternion localRotation; public void SetParent(Transform p){} public void SetParent(Transform p,bool w){} public Transform parent{get;set;} public void LookAt(Transform t){} public void LookAt(Vector3 p){} }
               public class RectTransform: Transform{ public Vector2 anchoredPosition; public Vector2 anchorMin; public Vector2 anchorMax; public Vector2 sizeDelta; public Vector2 offsetMin; public Vector2 offsetMax; }
-              public struct Vector2{ public float x,y; public Vector2(float x,float y){this.x=x;this.y=y;} public static Vector2 zero=>new(0,0); public static Vector2 one=>new(1,1); }
-              public struct Vector3{ public float x,y,z; public Vector3(float x,float y,float z){this.x=x;this.y=y;this.z=z;} public Vector3(float x,float y){this.x=x;this.y=y;this.z=0;} public static Vector3 zero=>new(0,0,0); public static Vector3 one=>new(1,1,1); public static Vector3 operator*(Vector3 a,float d)=>new(a.x*d,a.y*d,a.z*d); public static Vector3 operator+(Vector3 a,Vector3 b)=>new(a.x+b.x,a.y+b.y,a.z+b.z); public static Vector3 operator-(Vector3 a,Vector3 b)=>new(a.x-b.x,a.y-b.y,a.z-b.z); public static Vector3 Lerp(Vector3 a,Vector3 b,float t)=>new(a.x+(b.x-a.x)*Clamp01(t),a.y+(b.y-a.y)*Clamp01(t),a.z+(b.z-a.z)*Clamp01(t)); static float Clamp01(float f)=>f>1?1:(f<0?0:f); }
+              public struct Vector2{ public float x,y; public Vector2(float x,float y){this.x=x;this.y=y;} public static Vector2 zero=>new(0,0); public static Vector2 one=>new(1,1); public static Vector2 operator-(Vector2 a,Vector2 b)=>new(a.x-b.x,a.y-b.y); public static Vector2 operator+(Vector2 a,Vector2 b)=>new(a.x+b.x,a.y+b.y); }
+              public struct Vector3{ public float x,y,z; public Vector3(float x,float y,float z){this.x=x;this.y=y;this.z=z;} public Vector3(float x,float y){this.x=x;this.y=y;this.z=0;} public static Vector3 zero=>new(0,0,0); public static Vector3 one=>new(1,1,1); public static Vector3 operator*(Vector3 a,float d)=>new(a.x*d,a.y*d,a.z*d); public static Vector3 operator+(Vector3 a,Vector3 b)=>new(a.x+b.x,a.y+b.y,a.z+b.z); public static Vector3 operator-(Vector3 a,Vector3 b)=>new(a.x-b.x,a.y-b.y,a.z-b.z); public static Vector3 Lerp(Vector3 a,Vector3 b,float t)=>new(a.x+(b.x-a.x)*Clamp01(t),a.y+(b.y-a.y)*Clamp01(t),a.z+(b.z-a.z)*Clamp01(t)); public static Vector3 SmoothDamp(Vector3 c,Vector3 t,ref Vector3 v,float s)=>t; static float Clamp01(float f)=>f>1?1:(f<0?0:f); }
               public struct Vector2Int{ public int x,y; public Vector2Int(int x,int y){this.x=x;this.y=y;}}
               public struct Quaternion{ public float x,y,z,w; public static Quaternion identity=>new(); public static Quaternion Euler(float x,float y,float z)=>new(); }
-              public struct Color{ public float r,g,b,a; public Color(float r,float g,float b,float a){this.r=r;this.g=g;this.b=b;this.a=a;} public static Color white=>new(1,1,1,1); public static Color black=>new(0,0,0,1); public static Color green=>new(0,1,0,1); }
+              public struct Color{ public float r,g,b,a; public Color(float r,float g,float b,float a){this.r=r;this.g=g;this.b=b;this.a=a;} public Color(float r,float g,float b){this.r=r;this.g=g;this.b=b;this.a=1;} public static Color white=>new(1,1,1,1); public static Color black=>new(0,0,0,1); public static Color green=>new(0,1,0,1); }
               public class Texture2D: Object{} public class AudioClip: Object{} public class Font: Object{} public class Shader: Object{ public static Shader Find(string n)=>null; }
               public class Material: Object{ public Material(Shader s){} public Texture2D mainTexture{get;set;} public Color color{get;set;} public void SetFloat(string n,float v){} }
               public class Mesh: Object{ public Vector3[] vertices; public Vector2[] uv; public int[] triangles; public void RecalculateNormals(){} public void RecalculateBounds(){} }
               public class MeshFilter: Component{ public Mesh mesh; } public class MeshRenderer: Component{ public Material material; public Material[] materials; } public class Renderer: Component{ public Material material; public Material[] materials; }
               public class AudioSource: Component{ public AudioClip clip; public bool loop; public bool playOnAwake; public bool isPlaying; public void Play(){} public void Stop(){} public void PlayOneShot(AudioClip c){} }
               public class Camera: Behaviour{ public static Camera main{get;set;} public float fieldOfView; public float nearClipPlane; public float farClipPlane; public bool orthographic; }
-              public class Animator: Behaviour{ public float speed; public void SetTrigger(string n){} }
+              public class CameraRotateAroundTarget: MonoBehaviour{}
+              public class Animator: Behaviour{ public float speed; public void SetTrigger(string n){} public void Play(string s){} }
               public class Time{ public static float deltaTime=>0.016f; }
               public class Random{ public static float Range(float a,float b)=>a; public static int Range(int a,int b)=>a; }
               public class Mathf{ public static float Abs(float f)=>f; public static int Abs(int i)=>i; public static float Sqrt(float f)=>0; public static float Lerp(float a,float b,float t)=>a; public static float Clamp(float v,float a,float b)=>v<a?a:(v>b?b:v); public static float Deg2Rad=>0.01745f; public static float Sin(float f)=>(float)Math.Sin(f); public static float Cos(float f)=>(float)Math.Cos(f); public static float Clamp01(float f)=>f>1?1:(f<0?0:f); }
@@ -91,7 +92,7 @@ jobs:
               public class Outline: MonoBehaviour{ public Color effectColor; public Vector2 effectDistance; }
               public class Input{ public static bool GetMouseButton(int b)=>false; public static bool GetMouseButtonDown(int b)=>false; public static Vector2 mousePosition=>Vector2.zero; public static int touchCount=>0; public static Touch GetTouch(int i)=>new Touch(); public static float GetAxis(string n)=>0; public static bool GetKeyDown(int k)=>false; }
               public struct Touch{ public Vector2 position; public TouchPhase phase; } public enum TouchPhase{ Began, Moved, Stationary, Ended, Canceled }
-              public class AsyncOperation: Object{ public float progress; public bool isDone; }
+              public class AsyncOperation: Object{ public float progress; public bool isDone; public bool allowSceneActivation; }
               public class WaitForSeconds: CustomYieldInstruction{ public WaitForSeconds(float s){} }
               public class WaitForEndOfFrame: CustomYieldInstruction{}
               public class WaitUntil: CustomYieldInstruction{ public WaitUntil(Func<bool> p){} }
