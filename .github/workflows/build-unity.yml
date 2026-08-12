@@ -250,7 +250,7 @@ jobs:
           targetPlatform: Android
           buildName: ChineseChess3D
           buildsPath: CIBuild
-          unityVersion: 2022.3.62f1
+          unityVersion: 2022.3.76f1
           customParameters: -executeMethod CIBuildScript.BuildAndroid
 
       - name: Upload APK
