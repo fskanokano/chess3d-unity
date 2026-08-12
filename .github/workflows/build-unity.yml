@@ -190,28 +190,38 @@ jobs:
           [ $FAIL -ne 0 ] && { echo "❌ 资源检查失败"; exit 1; }
           echo "✓ 所有关键资源检查通过"
 
-  # ── Job 2: 构建 Android APK（需要 UNITY_LICENSE secret，失败不影响 verify）──
+
+  # ── Job 2: 构建 Android APK（需 UNITY_LICENSE secret）──
   build-apk:
     needs: verify
     runs-on: ubuntu-latest
     name: Build Android APK
-    # 仅当 UNITY_LICENSE 存在时才运行 true 构建；否则跳过（verify 已保证素材完整）
-    # 需要在仓库 Settings > Secrets 添加 UNITY_LICENSE/EMAIL/PASSWORD 才可真机构建 APK
-    # 未配置时该 job 自动跳过，verify + package 仍正常产出
-    if: ${{ secrets.UNITY_LICENSE != '' }}
     steps:
+      - name: Check Unity License
+        id: check_license
+        run: |
+          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
+            echo "UNITY_LICENSE not set - APK build will be skipped"
+            echo "has_license=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_license=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout
+        if: steps.check_license.outputs.has_license == 'true'
         uses: actions/checkout@v4
         with:
           lfs: false
 
       - name: Setup Java 17
+        if: steps.check_license.outputs.has_license == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Cache Library
+        if: steps.check_license.outputs.has_license == 'true'
         uses: actions/cache@v4
         with:
           path: Library
@@ -220,6 +230,7 @@ jobs:
             Library-
 
       - name: Build APK with Unity
+        if: steps.check_license.outputs.has_license == 'true'
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -233,11 +244,16 @@ jobs:
           customParameters: -executeMethod CIBuildScript.BuildAndroid
 
       - name: Upload APK
+        if: steps.check_license.outputs.has_license == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ChineseChess3D-APK-${{ github.run_number }}
           path: CIBuild/ChineseChess3D.apk
           retention-days: 30
+
+      - name: Skip notice
+        if: steps.check_license.outputs.has_license == 'false'
+        run: echo "⏭ APK build skipped - add UNITY_LICENSE/EMAIL/PASSWORD in Settings > Secrets to enable. Verify + Package still produced."
 
   # ── Job 3: 打包项目源码（始终执行）──
   package:
