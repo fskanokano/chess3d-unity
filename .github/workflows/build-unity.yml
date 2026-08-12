@@ -197,31 +197,41 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Android APK
     steps:
-      - name: Check Unity License
+      - name: Check / Auto-activate Unity License
         id: check_license
         run: |
-          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
-            echo "UNITY_LICENSE not set - APK build will be skipped"
-            echo "has_license=false" >> $GITHUB_OUTPUT
-          else
+          if [ -n "${{ secrets.UNITY_LICENSE }}" ]; then
+            echo "UNITY_LICENSE found - will build APK"
             echo "has_license=true" >> $GITHUB_OUTPUT
+          elif [ -n "${{ secrets.UNITY_EMAIL }}" ] && [ -n "${{ secrets.UNITY_PASSWORD }}" ]; then
+            echo "No UNITY_LICENSE but UNITY_EMAIL/PASSWORD found - will attempt auto-activation (free Personal)"
+            echo "has_license=auto" >> $GITHUB_OUTPUT
+          else
+            echo "No Unity credentials - APK build will be skipped"
+            echo "has_license=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Auto-activate Personal License (free)
+        if: steps.check_license.outputs.has_license == 'auto'
+        uses: game-ci/unity-activate@v2
+        with:
+          unityVersion: 2022.3.62f1
+
       - name: Checkout
-        if: steps.check_license.outputs.has_license == 'true'
+        if: steps.check_license.outputs.has_license != 'false'
         uses: actions/checkout@v4
         with:
           lfs: false
 
       - name: Setup Java 17
-        if: steps.check_license.outputs.has_license == 'true'
+        if: steps.check_license.outputs.has_license != 'false'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Cache Library
-        if: steps.check_license.outputs.has_license == 'true'
+        if: steps.check_license.outputs.has_license != 'false'
         uses: actions/cache@v4
         with:
           path: Library
@@ -230,7 +240,7 @@ jobs:
             Library-
 
       - name: Build APK with Unity
-        if: steps.check_license.outputs.has_license == 'true'
+        if: steps.check_license.outputs.has_license != 'false'
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -244,7 +254,7 @@ jobs:
           customParameters: -executeMethod CIBuildScript.BuildAndroid
 
       - name: Upload APK
-        if: steps.check_license.outputs.has_license == 'true'
+        if: steps.check_license.outputs.has_license != 'false'
         uses: actions/upload-artifact@v4
         with:
           name: ChineseChess3D-APK-${{ github.run_number }}
