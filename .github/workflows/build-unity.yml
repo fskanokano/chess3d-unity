@@ -257,7 +257,11 @@ jobs:
 
       - name: Skip notice
         if: steps.check_license.outputs.has_license == 'false'
-        run: echo "⏭ APK build skipped - add UNITY_LICENSE/EMAIL/PASSWORD in Settings > Secrets to enable. Verify + Package still produced."
+        run: |
+          echo "⏭ APK build skipped - Unity License not configured."
+          echo "  To enable APK: Unity Hub -> Preferences -> Licenses -> Add -> Get free Personal -> find Unity_lic.ulf"
+          echo "  Then: cat Unity_lic.ulf | base64 -w0 | gh secret set UNITY_LICENSE --repo fskanokano/chess3d-unity"
+          echo "  Verify + Package still produced as fallback."
 
   # ── Job 3: 打包项目源码（始终执行）──
   package:
